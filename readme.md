@@ -35,7 +35,7 @@ def print_hello():
     print("Hello")
 
 # Create an Every instance that runs every 1 second
-every_sec = Every(1.0, print_hello)
+every_sec = Every(1.0).do(print_hello)
 
 # In your main loop:
 executed, result = every_sec()  # Will execute if 1 second has passed
@@ -48,7 +48,7 @@ def greet(name):
     print(f"Hello, {name}!")
 
 # Create with default parameters
-greeter = Every(2.0, greet, name="World")
+greeter = Every(2.0).do(greet, name="World")
 
 # Override parameters on call
 greeter(name="Alice")  # Will use "Alice" instead of "World"
@@ -60,7 +60,10 @@ greeter(name="Alice")  # Will use "Alice" instead of "World"
 from time import time
 
 # Use regular time() instead of monotonic()
-custom_timer = Every(1.0, print_hello, time_func=time)
+custom_timer = Every(1.0).do(print_hello).using(time)
+
+# Can also combine with parameters
+custom_timer = Every(1.0).do(greet, name="World").using(time)
 ```
 
 ## API Reference
@@ -70,15 +73,18 @@ custom_timer = Every(1.0, print_hello, time_func=time)
 #### Constructor
 
 ```python
-Every(interval: float, do: Callable, *, time_func: Callable = monotonic, **kwargs: Any)
+Every(interval: float)
 ```
 
 - `interval`: Time between executions in seconds
-- `do`: Function to execute periodically
-- `time_func`: Optional function to get current time (defaults to `time.monotonic`)
-- `**kwargs`: Default arguments to pass to `do`
 
 #### Methods
+
+- `do(action: Callable, **kwargs: Any) -> Every`: Set the function to execute and its arguments
+  - Returns: The Every instance for method chaining
+
+- `using(time_func: Callable) -> Every`: Optional - Set the time function (defaults to `monotonic`)
+  - Returns: The Every instance for method chaining
 
 - `__call__(**kwargs)`: Check if it's time to execute and run the function
   - Returns: `tuple[bool, Any]`
