@@ -66,27 +66,19 @@ class Every:
         return max(0.0, self._next_time - self._time_func())
 
 
-    def __call__(self, **kwargs: Any) -> tuple[bool, Any]:
-        """
-        Checks if the scheduled interval has passed and executes the stored function if so.
-
-        Args:
-            **kwargs: Additional keyword arguments to pass to the stored function.
-
-        Returns:
-            tuple[bool, Any]: A tuple containing:
-                - bool: True if the function was executed, False otherwise.
-                - Any: The return value from the function if executed, or None otherwise.
-        """
-        if self._action is None:
-            raise ValueError("No action has been set. Use the 'do' method to set a function to execute.")
-        
+    def _wrapper(self, *args, **kwargs) -> tuple[bool, Any]:
+        """Internal method to create a wrapper for the action function."""
         if self._time_func() >= self._next_time:
             self._next_time += self._interval # keep time interval consistent 
             merged_kwargs = {**self._kwargs, **kwargs}
             result = self._action(**merged_kwargs)
             return True, result
         return False, None
+
+
+    def __call__(self, func: Callable) -> Callable:
+        self._action = func
+        return self._wrapper
 
 
     @property
@@ -108,7 +100,7 @@ class Every:
 
 
 # decorator for class Every:
-def every(interval: float, *, 
+'''def every(interval: float, *, 
           timer_function: Callable = monotonic, 
           execute_immadeately: bool = False, **kwargs: Any
           ) -> Callable:
@@ -121,6 +113,7 @@ def every(interval: float, *,
         return Every(interval, execute_immediately=execute_immadeately).do(func, **kwargs).using(timer_function)
     
     return wrapper
+'''
 
 
 def Demo():
@@ -129,7 +122,7 @@ def Demo():
     # from every import Every, every
 
     # decorator usage:
-    @every(math.e, param1=10, param2=20, timer_function=monotonic, execute_immadeately=True) # static param1 and param2, execute on first call
+    @Every(math.e, param1=10, param2=20, timer_function=monotonic, execute_immadeately=True) # static param1 and param2, execute on first call
     def MyFunction1(param1, param2, param3): # param3 is required dynamically when calling the function
         print(f"Function executed with {param1=}, {param2=} and {param3=}")
         return param1 + param2 + param3
