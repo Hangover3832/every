@@ -66,6 +66,17 @@ custom_timer = Every(1.0).do(print_hello).using(time)
 custom_timer = Every(1.0).do(greet, name="World").using(time)
 ```
 
+### Use as a decorator
+```python
+@Every.every(5.0, greets="Holla", timer_function=monotonic, execute_immadeately=True)
+def greet(greets, name):
+    print(f"{greets}, {name}!")
+
+while True:
+    greet(name="Alex") # the parameter 'greets' got past in the decorator
+    ...
+```
+
 ## API Reference
 
 ### Class: Every
@@ -77,6 +88,8 @@ Every(interval: float)
 ```
 
 - `interval`: Time between executions in seconds
+- `timer_function`: Custom timer function, defaults to `time.monotonic`
+- `execute_immadeately`: Executes the function immediately upon the first call
 
 #### Methods
 
@@ -91,9 +104,12 @@ Every(interval: float)
     - `bool`: Whether the function was executed
     - `Any`: Return value from the function (if executed)
 
+- `reset()`: Resets the timer to start from current moment
+
 #### Properties
 
 - `interval`: Get/set the time interval between executions
+- `time_remaining`: Get the remaining time until the next execution (read only)
 
 ## Notes
 
@@ -101,6 +117,7 @@ Every(interval: float)
 - Changing the interval resets the next execution time
 - The class maintains consistent intervals by adding the interval to the last scheduled time
 - Additional keyword arguments can be passed both during initialization and execution
+- pylance seems to have some troubles with type checking the decorated functions
 
 ## License
 
