@@ -48,7 +48,7 @@ def greet(name):
     print(f"Hello, {name}!")
 
 # Create with default parameters
-greeter = Every(2.0).do(greet, name="World")
+greeter = Every(2.0).do(greet).among(name="World")
 
 # Override parameters on call
 greeter(name="Alice")  # Will use "Alice" instead of "World"
@@ -63,14 +63,18 @@ from time import time
 custom_timer = Every(1.0).do(print_hello).using(time)
 
 # Can also combine with parameters
-custom_timer = Every(1.0).do(greet, name="World").using(time)
+custom_timer = Every(1.0).do(greet).among(name="World").using(time)
 ```
 
 ### Use as a decorator
 ```python
-@Every.every(5.0, greets="Holla", timer_function=monotonic, execute_immadeately=True)
+@Every.every(5.0, greets="Holla", timer_function=monotonic)
 def greet(greets, name):
     print(f"{greets}, {name}!")
+
+...
+greet.reset().execute(name="Bob"): # reset the timer and execute the function immediately
+...
 
 while True:
     greet(name="Alex") # the parameter 'greets' got past in the decorator
@@ -84,27 +88,39 @@ while True:
 #### Constructor
 
 ```python
-Every(interval: float)
+Every(interval: float, execute_immediately: bool = False)
 ```
 
 - `interval`: Time between executions in seconds
-- `timer_function`: Custom timer function, defaults to `time.monotonic`
-- `execute_immadeately`: Executes the function immediately upon the first call
+- `execute_immediately`: Executes the function immediately upon the first call
 
 #### Methods
 
-- `do(action: Callable, **kwargs: Any) -> Every`: Set the function to execute and its arguments
+- `do(action: Callable) -> Every`: Set the function to execute
+  - Returns: The Every instance for method chaining
+
+- `among(**kwargs)`: Set the function's static keyword arguments
   - Returns: The Every instance for method chaining
 
 - `using(time_func: Callable) -> Every`: Optional - Set the time function (defaults to `monotonic`)
   - Returns: The Every instance for method chaining
 
-- `__call__(**kwargs)`: Check if it's time to execute and run the function
+- `__call__(*args, **kwargs)`: Check if it's time to execute and run the function
   - Returns: `tuple[bool, Any]`
     - `bool`: Whether the function was executed
     - `Any`: Return value from the function (if executed)
 
-- `reset()`: Resets the timer to start from current moment
+- `reset()`: Resets the timer to start from current moment. 
+  - Returns: The Every instance for method chaining, e.g. `.reset().execute()`
+
+- `pause()`: Stop timed execution
+  - Returns: The Every instance for method chaining
+
+- `resume()`: Continue timed execution. This method can be chained
+  - Returns: The Every instance for method chaining, e.g. `.resume().reset()` 
+
+- `execute(*args, **kwargs)`: Execute the function immediately
+  - Returns: The function's result
 
 #### Properties
 
