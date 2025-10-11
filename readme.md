@@ -88,11 +88,12 @@ while True:
 #### Constructor
 
 ```python
-Every(interval: float, execute_immediately: bool = False)
+Every(interval: float, execute_immediately: bool = False, keep_interval: bool = True)
 ```
 
 - `interval`: Time between executions in seconds
 - `execute_immediately`: Executes the function immediately upon the first call
+- `keep_interval (bool)`: Keep correct time interval if set to True, else keep time distance after function call
 
 #### Methods
 
