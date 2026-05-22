@@ -1,4 +1,4 @@
-"""
+﻿"""
 executing a function at regular intervals
 Author: AlexL
 License: MIT
@@ -93,8 +93,9 @@ class Every:
         self._paused: bool = False
         self._next_time: float = self._time_func() if execute_immediately else self._time_func() + interval
         self._is_decorator: bool = False
-        self._result = None
-        self.instance = self
+        self._result: Any = None
+        self.instance: Every = self
+        self._break_loop: bool = False
 
 
     def _dummy_action(self, *args, **kwargs) -> NoReturn:
@@ -110,6 +111,9 @@ class Every:
         merged_kwargs = {**self._kwargs, **kwargs}
         t = monotonic() + self._interval
         while monotonic() < t:
+            if self._break_loop:
+                self._break_loop = False
+                return self
             self._result = self._action(*args, **merged_kwargs)
         return self
 
@@ -185,6 +189,9 @@ class Every:
         merged_kwargs = {**self._kwargs, **kwargs}
         self._result = self._action(*args, **merged_kwargs)
         return self._result
+    
+    def break_loop(self) -> None:
+        self._break_loop = True
 
 
     @property
